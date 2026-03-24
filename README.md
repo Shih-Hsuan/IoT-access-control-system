@@ -14,7 +14,7 @@ This repository contains the source code for an **IoT-enabled Access Control Sys
 
 | 🖥️ 8051 Local Core Board | 📱 MyMQTT Mobile Interface |
 | :---: | :---: |
-| <img src="https://github.com/user-attachments/assets/1eaeec85-92d8-4e13-a7bd-7b44596807fa"> | <img src="https://github.com/user-attachments/assets/daf7a23f-71ec-4d98-bb74-5145359439f4" width="300" alt="MQTT App"> |
+| <img src="https://github.com/user-attachments/assets/1eaeec85-92d8-4e13-a7bd-7b44596807fa"> | <img src="https://github.com/user-attachments/assets/8d631130-e799-42e4-a36b-55c068d5e3e7" width="300" alt="MQTT App"> |
 | *Hardware setup displaying system status via 7-segment LEDs and matrix keypad.* | *Remote interface used for sending `SET` passwords and PWM `PLAY` commands.* |
 
 ## System Architecture & Hardware Partitioning
