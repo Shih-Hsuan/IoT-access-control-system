@@ -1,35 +1,65 @@
-# 嵌入式系統設計 - 期末專案
-## 主題: 物聯網密碼鎖與音樂播放系統設計
-### 功能介紹
-* 8051設定密碼 MQTT猜密碼
-> 使用者可以透過MQTT的手機APP輸入四個數字(不重複)，去跟8051上設定的密碼做比對，8051會回傳XAXB，表示是否正確猜中該密碼，沒猜中可以繼續猜，若猜中了將解鎖音樂撥放功能，使用者可以透MQTT APP 輸入音名、高低音、節拍，來撥放音樂
-* MQTT設定密碼 8051猜密碼
-> 使用者可以透過8051輸入四個數字(不重複)，去跟MQTT上設定的密碼做比對，ESP32會回傳XAXB，表示是否正確猜中該密碼，沒猜中可以繼續猜，若猜中了將解鎖音樂撥放功能，使用者可以透MQTT APP 輸入音名、高低音、節拍，來撥放音樂
+<h1 align="center">IoT Access Control & Audio Feedback System</h1>
 
-### 實作方式
-> 8051 與 ESP32 使用 UART 溝通，並通過MQTT傳遞訊息
-### 實際操作方式
-* 可以利用8051上的矩陣鍵盤控制
-  * 0~9: 輸入的密碼
-  * 10: 設定密碼
-  * 11: 比對猜測密碼
-  * 12: 傳送猜測密碼
-* ESP32 & MQTT
-  * 輸入密碼: 0~9(四位數字)
-  * 接收訊息: XAXB
-  * 出題者: 字串格式 ex: SET1234
-  * 設定音樂: 字串格式 ex: PLAY[頻率][高低][拍子]
-* MQTT TOPIC:
-    * es/project/01057006
-### 接線定義
-* 8051:
-    * 八個七段顯示器: P0
-    * 矩陣鍵盤: P1
-    * 段鎖存: P2^2
-    * 位鎖存: P2^3
-    * 繼電器: P2^7
-* ESP32 <-> 8051
-    * GPIO17 <-> RX
-    * GPIO16 <-> TX
-    * GPIO15 <-> SPK
-    * GND <-> GND
+<p align="center">
+  <img src="https://img.shields.io/badge/Language-C-00599C?style=for-the-badge&logo=c" alt="C">
+  <img src="https://img.shields.io/badge/MCU-8051%20%7C%20ESP32-red?style=for-the-badge" alt="MCU">
+  <img src="https://img.shields.io/badge/Protocol-UART%20%7C%20MQTT-success?style=for-the-badge" alt="Protocol">
+  <img src="https://img.shields.io/badge/Hardware-EEPROM%20%7C%20PWM-yellow?style=for-the-badge" alt="Hardware">
+</p>
+
+## Project Overview
+This repository contains the source code for an **IoT-enabled Access Control System**, originally developed as a course project at National Taiwan Ocean University. The system bridges a bare-metal **8051 microcontroller (Local MCU)** with an **ESP32 (IoT Gateway)**, combining physical security control with remote cloud connectivity and PWM-based audio feedback.
+
+## System Demonstration
+
+| 🖥️ 8051 Local Core Board | 📱 MyMQTT Mobile Interface |
+| :---: | :---: |
+| <img src="https://github.com/user-attachments/assets/1eaeec85-92d8-4e13-a7bd-7b44596807fa"> | <img src="https://github.com/user-attachments/assets/daf7a23f-71ec-4d98-bb74-5145359439f4" width="300" alt="MQTT App"> |
+| *Hardware setup displaying system status via 7-segment LEDs and matrix keypad.* | *Remote interface used for sending `SET` passwords and PWM `PLAY` commands.* |
+
+## System Architecture & Hardware Partitioning
+The project adopts a Hardware-Software Co-design approach, dividing tasks between two microcontrollers via **UART**:
+
+### 1. 8051 Microcontroller (Local Core)
+- **User Interface:** Scans a 4x4 Matrix Keypad for password entry and drives an 8-digit 7-Segment LED array for status display.
+- **Non-Volatile Storage:** Utilizes **EEPROM** for reliable, persistent password storage.
+- **Actuator Control:** Controls a physical relay (mocking a door lock mechanism).
+
+### 2. ESP32 (IoT Gateway & Audio Engine)
+- **Cloud Connectivity:** Connects to Wi-Fi and utilizes the **MQTT** protocol to interact with a mobile application.
+- **Audio Generation:** Implements Hardware **PWM (Pulse Width Modulation)** to drive a speaker, generating authentication alerts and custom melodies.
+
+## Key Features
+
+### 1. Bidirectional Authentication (1A2B Logic)
+The system features a dual-mode authentication process utilizing a "Bulls and Cows" (XAXB) evaluation logic:
+- **Local-Set, Remote-Guess:** A 4-digit password is set via the 8051 keypad. Users attempt to unlock it remotely via the MQTT App, receiving real-time `XAXB` feedback.
+- **Remote-Set, Local-Guess:** The password is set via the MQTT App (`SETxxxx`). Users attempt to unlock it physically using the 8051 keypad, with the ESP32 evaluating the input.
+
+### 2. Remote Music Player (PWM Melody Engine)
+Upon successful authentication, the system unlocks an audio mode. Users can send formatted string payloads via MQTT to dynamically play music on the local hardware.
+- **Payload Format:** `PLAY[Frequency/Note][Pitch][Beat]`
+
+
+## Communication Protocols
+
+- **Local Bus:** UART bridging 8051 and ESP32.
+- **Cloud Protocol:** MQTT 
+  - **Topic:** `es/project/01057006`
+
+## Hardware Wiring & Pinouts
+
+**8051 Core Board:**
+- `P0` : 8-Digit 7-Segment Display (Data)
+- `P1` : Matrix Keypad
+- `P2^2` : Segment Latch Enable
+- `P2^3` : Bit Latch Enable
+- `P2^7` : Relay Control (Lock Actuator)
+
+**ESP32 ↔ 8051 Interface:**
+- `GPIO17` (ESP32 TX) ↔ `RX` (8051)
+- `GPIO16` (ESP32 RX) ↔ `TX` (8051)
+- `GPIO15` (ESP32 PWM) ↔ Speaker Module
+- `GND` ↔ Common Ground
+
+
